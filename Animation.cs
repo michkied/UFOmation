@@ -9,16 +9,8 @@ namespace UFOmation;
 
 public class Animation : GameWindow
 {
-    // private readonly uint[] _indices =
-    // {
-    //     // note that we start from 0!
-    //     0, 1, 3, // first triangle
-    //     1, 2, 3 // second triangle
-    // };
-
     private readonly Shader _shader;
 
-    // private int _elementBufferObject;
     private int _vertexArrayObject;
     private int _vertexBufferObject;
 
@@ -35,8 +27,8 @@ public class Animation : GameWindow
         _shader = new Shader("../../../shaders/shader.vert", "../../../shaders/shader.frag");
 
         _models.Add(new Surface(_shader));
-        _models.Add(new Sphere(_shader));
-        _models.Add(new UFO(_shader));
+        // _models.Add(new Sphere(_shader));
+        // _models.Add(new UFO(_shader));
     }
 
     protected override void OnUpdateFrame(FrameEventArgs args)
@@ -76,10 +68,7 @@ public class Animation : GameWindow
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         _shader.Use();
 
-        foreach (var model in _models)
-        {
-            model.Draw();
-        }
+        foreach (var model in _models) model.Draw();
 
         SwapBuffers();
     }

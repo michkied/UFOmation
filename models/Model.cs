@@ -17,7 +17,7 @@ public abstract class Model(Shader shader)
 
         _vertexBufferObject = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
-        float[] vertices = GetVertices();
+        var vertices = GetVertices();
         GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices,
             BufferUsageHint.StaticDraw
         );
@@ -27,17 +27,17 @@ public abstract class Model(Shader shader)
         // GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices,
         //     BufferUsageHint.StaticDraw);
 
-        int attributeLocation = _shader.GetAttribLocation("pos");
-        GL.VertexAttribPointer(attributeLocation, 3, VertexAttribPointerType.Float, false,
-            6 * sizeof(float), 0
-        );
+        var attributeLocation = _shader.GetAttribLocation("pos");
         GL.EnableVertexAttribArray(attributeLocation);
+        GL.VertexAttribPointer(attributeLocation, 3, VertexAttribPointerType.Float, false,
+            5 * sizeof(float), 0
+        );
 
-        attributeLocation = _shader.GetAttribLocation("color");
-        GL.VertexAttribPointer(attributeLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float),
+        attributeLocation = _shader.GetAttribLocation("tex");
+        GL.EnableVertexAttribArray(attributeLocation);
+        GL.VertexAttribPointer(attributeLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float),
             3 * sizeof(float)
         );
-        GL.EnableVertexAttribArray(attributeLocation);
     }
 
     public virtual void Draw()
@@ -45,5 +45,8 @@ public abstract class Model(Shader shader)
         throw new NotImplementedException();
     }
 
-    protected virtual float[] GetVertices() => [];
+    protected virtual float[] GetVertices()
+    {
+        return [];
+    }
 }

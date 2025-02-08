@@ -5,8 +5,11 @@ namespace UFOmation.models;
 
 public class UFO : Model
 {
+    private Texture _texture;
+
     public UFO(Shader shader) : base(shader)
     {
+        _texture = new Texture("../../../textures/dirt/dirt.jpg");
         Init();
     }
 
@@ -18,5 +21,8 @@ public class UFO : Model
         GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
     }
 
-    protected override float[] GetVertices() => Cube.Vertices;
+    protected override float[] GetVertices()
+    {
+        return Cube.Vertices;
+    }
 }
