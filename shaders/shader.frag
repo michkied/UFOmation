@@ -3,8 +3,8 @@ in vec2 texCoord;
 out vec4 FragColor;
 
 //In order to calculate some basic lighting we need a few things per model basis, and a few things per fragment basis:
-uniform vec3 viewPos; //The position of the view and/or of the player.
 uniform sampler2D texture0; //The texture of the object.
+uniform mat4 view;
 
 in vec3 Normal; //The normal of the fragment is calculated in the vertex shader.
 in vec3 FragPos; //The fragment position.
@@ -13,11 +13,11 @@ void main()
 {
     vec3 objectColor = texture(texture0, texCoord).rgb; //The color of the object.
     vec3 lightColor = vec3(1.0, 1.0, 1.0); //The color of the light.
-    vec3 lightPos = vec3(0.0, 0.3, 0.0); //The position of the light.
+    vec3 lightPos = vec3(vec4(0.0, 0.3, 0.0, 1.0) * view); //The position of the light.
 
     //The ambient color is the color where the light does not directly hit the object.
     //You can think of it as an underlying tone throughout the object. Or the light coming from the scene/the sky (not the sun).
-    float ambientStrength = 0.1;
+    float ambientStrength = 0.2;
     vec3 ambient = ambientStrength * lightColor;
 
     //We calculate the light direction, and make sure the normal is normalized.
@@ -33,7 +33,7 @@ void main()
     //The specular light is the light that shines from the object, like light hitting metal.
     //The calculations are explained much more detailed in the web version of the tutorials.
     float specularStrength = 0.5;
-    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 viewDir = normalize(-FragPos);
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32); //The 32 is the shininess of the material.
     vec3 specular = specularStrength * spec * lightColor;

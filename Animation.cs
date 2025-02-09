@@ -64,7 +64,7 @@ public class Animation : GameWindow
 
     private float _angle;
     private readonly float _radius = 3.0f; // Distance from the origin
-    private readonly float _speed = 0.5f; // Rotation speed
+    private readonly float _speed = 0.2f; // Rotation speed
 
     protected override void OnRenderFrame(FrameEventArgs e)
     {
@@ -76,7 +76,6 @@ public class Animation : GameWindow
         // Compute new camera position
         var camX = _radius * MathF.Cos(_angle);
         var camZ = _radius * MathF.Sin(_angle);
-        // Vector3 cameraPosition = new Vector3(camX, 2.0f, camZ); // Y remains constant
 
         var cameraPosition = new Vector3(camX, 1.0f, camZ);
         var view = Matrix4.LookAt(cameraPosition, Vector3.Zero, Vector3.UnitY);
