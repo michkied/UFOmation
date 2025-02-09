@@ -74,6 +74,12 @@ public class Shader
         GL.UniformMatrix4(GL.GetUniformLocation(_handle, name), true, ref matrix);
     }
 
+    public void SetVector3(string name, Vector3 vector)
+    {
+        Use();
+        GL.Uniform3(GL.GetUniformLocation(_handle, name), vector);
+    }
+
     private void CompileVertex(string path)
     {
         _vertexShader = GL.CreateShader(ShaderType.VertexShader);

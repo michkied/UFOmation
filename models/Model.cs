@@ -30,13 +30,19 @@ public abstract class Model(Shader shader)
         var attributeLocation = _shader.GetAttribLocation("pos");
         GL.EnableVertexAttribArray(attributeLocation);
         GL.VertexAttribPointer(attributeLocation, 3, VertexAttribPointerType.Float, false,
-            5 * sizeof(float), 0
+            8 * sizeof(float), 0
         );
 
         attributeLocation = _shader.GetAttribLocation("tex");
         GL.EnableVertexAttribArray(attributeLocation);
-        GL.VertexAttribPointer(attributeLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float),
+        GL.VertexAttribPointer(attributeLocation, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float),
             3 * sizeof(float)
+        );
+
+        attributeLocation = _shader.GetAttribLocation("normal");
+        GL.EnableVertexAttribArray(attributeLocation);
+        GL.VertexAttribPointer(attributeLocation, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float),
+            5 * sizeof(float)
         );
     }
 

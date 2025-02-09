@@ -43,14 +43,15 @@ public class Animation : GameWindow
 
         GL.Enable(EnableCap.DepthTest);
 
-        var view = Matrix4.CreateTranslation(0.0f, -1.0f, -3.0f) *
-                   Matrix4.CreateRotationX(MathHelper.DegreesToRadians(10.0f));
+        var cameraPosition = new Vector3(0.0f, 1.0f, 3.0f);
+        var view = Matrix4.LookAt(cameraPosition, Vector3.Zero, Vector3.UnitY);
         var projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(45.0f),
             (float)ClientSize.X / ClientSize.Y, 0.1f, 100.0f
         );
 
         _shader.SetMatrix4("view", view);
         _shader.SetMatrix4("projection", projection);
+        _shader.SetVector3("viewPos", cameraPosition);
 
         GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     }
@@ -61,10 +62,26 @@ public class Animation : GameWindow
         _shader.Dispose();
     }
 
+    private float _angle;
+    private readonly float _radius = 3.0f; // Distance from the origin
+    private readonly float _speed = 0.5f; // Rotation speed
+
     protected override void OnRenderFrame(FrameEventArgs e)
     {
         base.OnRenderFrame(e);
 
+        // Update rotation angle
+        _angle += (float)e.Time * _speed;
+
+        // Compute new camera position
+        var camX = _radius * MathF.Cos(_angle);
+        var camZ = _radius * MathF.Sin(_angle);
+        // Vector3 cameraPosition = new Vector3(camX, 2.0f, camZ); // Y remains constant
+
+        var cameraPosition = new Vector3(camX, 1.0f, camZ);
+        var view = Matrix4.LookAt(cameraPosition, Vector3.Zero, Vector3.UnitY);
+        _shader.SetMatrix4("view", view);
+        _shader.SetVector3("viewPos", cameraPosition);
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         _shader.Use();
 
