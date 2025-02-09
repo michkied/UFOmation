@@ -9,44 +9,69 @@ uniform mat4 view;
 in vec3 Normal; //The normal of the fragment is calculated in the vertex shader.
 in vec3 FragPos; //The fragment position.
 
+struct PointLight {
+    vec3 position;
+
+    float constant;
+    float linear;
+    float quadratic;
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
+
+vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 objColor)
+{
+    vec3 lightDir = normalize(light.position - fragPos);
+
+    //diffuse shading
+    float diff = max(dot(normal, lightDir), 0.0);
+
+    //specular shading
+    vec3 reflectDir = reflect(-lightDir, normal);
+    float spec = pow(max(dot(normalize(-fragPos), reflectDir), 0.0), 32);
+
+    //attenuation
+    float distance = length(light.position - fragPos);
+    float attenuation = 1.0 / (light.constant + light.linear * distance +
+    light.quadratic * (distance * distance));
+
+    //combine results
+    vec3 ambient = light.ambient * objColor;
+    vec3 diffuse = light.diffuse * diff * objColor;
+    vec3 specular = light.specular * spec * objColor;
+    return (ambient + diffuse + specular) * attenuation;
+}
+
+float CalcFogFactor(vec3 fragPos)
+{
+    float fogIntensity = 0.1;
+    if (fogIntensity == 0) return 1;
+    float gradient = (fogIntensity * fogIntensity - 5 * fogIntensity + 6);
+    float distance = length(fragPos);
+    float fog = exp(-pow((distance / gradient), 4));
+    fog = clamp(fog, 0.0, 1.0);
+    return fog;
+}
+
 void main()
 {
     vec3 objectColor = texture(texture0, texCoord).rgb; //The color of the object.
     vec3 lightColor = vec3(1.0, 1.0, 1.0); //The color of the light.
-    vec3 lightPos = vec3(vec4(0.0, 0.3, 0.0, 1.0) * view); //The position of the light.
 
-    //The ambient color is the color where the light does not directly hit the object.
-    //You can think of it as an underlying tone throughout the object. Or the light coming from the scene/the sky (not the sun).
-    float ambientStrength = 0.2;
-    vec3 ambient = ambientStrength * lightColor;
+    PointLight light;
+    light.position = vec3(vec4(0.0, 0.3, 0.0, 1.0) * view);
+    light.constant = 1.0;
+    light.linear = 0.09;
+    light.quadratic = 0.032;
+    light.ambient = vec3(0.2, 0.2, 0.2);
+    light.diffuse = vec3(1.0, 1.0, 1.0);
+    light.specular = vec3(0.5, 0.5, 0.5);
 
-    //We calculate the light direction, and make sure the normal is normalized.
-    vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(lightPos - FragPos); //Note: The light is pointing from the light to the fragment
+    vec3 result = CalcPointLight(light, normalize(Normal), FragPos, objectColor);
+    float fogFactor = CalcFogFactor(FragPos);
+    result = mix(vec3(1.0, 1.0, 1.0), result, fogFactor);
 
-    //The diffuse part of the phong model.
-    //This is the part of the light that gives the most, it is the color of the object where it is hit by light.
-    float diff = max(dot(norm, lightDir), 0.0); //We make sure the value is non negative with the max function.
-    vec3 diffuse = diff * lightColor;
-
-
-    //The specular light is the light that shines from the object, like light hitting metal.
-    //The calculations are explained much more detailed in the web version of the tutorials.
-    float specularStrength = 0.5;
-    vec3 viewDir = normalize(-FragPos);
-    vec3 reflectDir = reflect(-lightDir, norm);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32); //The 32 is the shininess of the material.
-    vec3 specular = specularStrength * spec * lightColor;
-
-    //    ambient *= 0;
-    //    diffuse *= 0;
-    //    //specular *= 0;
-
-    //At last we add all the light components together and multiply with the color of the object. Then we set the color
-    //and makes sure the alpha value is 1
-    vec3 result = (ambient + diffuse + specular) * objectColor;
     FragColor = vec4(result, 1.0);
-
-    //Note we still use the light color * object color from the last tutorial.
-    //This time the light values are in the phong model (ambient, diffuse and specular)
 }
