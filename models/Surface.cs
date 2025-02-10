@@ -5,7 +5,7 @@ namespace UFOmation.models;
 
 public class Surface : Model
 {
-    private Texture _texture;
+    private readonly Texture _texture;
 
     public Surface(Shader shader) : base(shader)
     {
@@ -15,7 +15,11 @@ public class Surface : Model
 
     public override void Draw()
     {
-        _shader.SetMatrix4("model", Matrix4.Identity);
+        _texture.Use();
+        _shader.Use();
+        var model = Matrix4.CreateScale(1.5f, 1.0f, 1.5f);
+        // var model = Matrix4.Identity;
+        _shader.SetMatrix4("model", model);
         GL.BindVertexArray(_vertexArrayObject);
         GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
     }
