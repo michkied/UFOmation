@@ -1,13 +1,12 @@
 ﻿#version 460
-in vec2 texCoord;
-out vec4 FragColor;
 
-//In order to calculate some basic lighting we need a few things per model basis, and a few things per fragment basis:
-uniform sampler2D texture0; //The texture of the object.
-uniform mat4 view;
+struct DirLight {
+    vec3 direction;
 
-in vec3 Normal; //The normal of the fragment is calculated in the vertex shader.
-in vec3 FragPos; //The fragment position.
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
 
 struct PointLight {
     vec3 position;
@@ -21,7 +20,40 @@ struct PointLight {
     vec3 specular;
 };
 
-vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 objColor)
+struct Material {
+    sampler2D diffuse;
+    sampler2D specular;
+    float shininess;
+};
+
+in vec2 texCoord;
+in vec3 Normal; //The normal of the fragment is calculated in the vertex shader.
+in vec3 FragPos; //The fragment position.
+
+//In order to calculate some basic lighting we need a few things per model basis, and a few things per fragment basis:
+uniform sampler2D texture0; //The texture of the object.
+uniform mat4 view;
+//uniform DirLight dirLight;
+uniform Material material;
+
+out vec4 FragColor;
+
+vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
+{
+    vec3 lightDir = normalize(-light.direction);
+    //diffuse shading
+    float diff = max(dot(normal, lightDir), 0.0);
+    //specular shading
+    vec3 reflectDir = reflect(-lightDir, normal);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    //combine results
+    vec3 ambient  = light.ambient  * vec3(texture(material.diffuse, texCoord));
+    vec3 diffuse  = light.diffuse  * diff * vec3(texture(material.diffuse, texCoord));
+    vec3 specular = light.specular * spec * vec3(texture(material.specular, texCoord));
+    return (ambient + diffuse + specular);
+}
+
+vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos)
 {
     vec3 lightDir = normalize(light.position - fragPos);
 
@@ -30,7 +62,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 objColor)
 
     //specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = pow(max(dot(normalize(-fragPos), reflectDir), 0.0), 32);
+    float spec = pow(max(dot(normalize(-fragPos), reflectDir), 0.0), material.shininess);
 
     //attenuation
     float distance = length(light.position - fragPos);
@@ -38,9 +70,9 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 objColor)
     light.quadratic * (distance * distance));
 
     //combine results
-    vec3 ambient = light.ambient * objColor;
-    vec3 diffuse = light.diffuse * diff * objColor;
-    vec3 specular = light.specular * spec * objColor;
+    vec3 ambient = light.ambient * vec3(texture(material.diffuse, texCoord));
+    vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, texCoord));
+    vec3 specular = light.specular * spec * vec3(texture(material.specular, texCoord));
     return (ambient + diffuse + specular) * attenuation;
 }
 
@@ -57,9 +89,6 @@ float CalcFogFactor(vec3 fragPos)
 
 void main()
 {
-    vec3 objectColor = texture(texture0, texCoord).rgb; //The color of the object.
-    vec3 lightColor = vec3(1.0, 1.0, 1.0); //The color of the light.
-
     PointLight light;
     light.position = vec3(vec4(0.0, 1.0, 0.0, 1.0) * view);
     light.constant = 1.0;
@@ -68,8 +97,15 @@ void main()
     light.ambient = vec3(0.2, 0.2, 0.2);
     light.diffuse = vec3(1.0, 1.0, 1.0);
     light.specular = vec3(0.5, 0.5, 0.5);
+    
+    DirLight dirLight;
+    dirLight.direction = normalize(vec3(vec4(0.0, -1.0, 0.0, 0.0) * view));
+    dirLight.ambient = vec3(0.05, 0.05, 0.05);
+    dirLight.diffuse = vec3(1.0, 1.0, 1.0);
+    dirLight.specular = vec3(0.5, 0.5, 0.5);
 
-    vec3 result = CalcPointLight(light, normalize(Normal), FragPos, objectColor);
+    vec3 result = CalcDirLight(dirLight, normalize(Normal), normalize(-FragPos));
+//    vec3 result = CalcPointLight(light, normalize(Normal), FragPos);
     float fogFactor = CalcFogFactor(FragPos);
     result = mix(vec3(1.0, 1.0, 1.0), result, fogFactor);
 

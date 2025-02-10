@@ -30,6 +30,7 @@ public class UFO : Model
     public override void Draw(double time)
     {
         _texture.Use();
+        _texture.Use(TextureUnit.Texture1);
         _shader.Use();
         var model = Matrix4.Identity;
 

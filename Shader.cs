@@ -80,6 +80,18 @@ public class Shader
         GL.Uniform3(GL.GetUniformLocation(_handle, name), vector);
     }
 
+    public void SetInt(string name, int value)
+    {
+        Use();
+        GL.Uniform1(GL.GetUniformLocation(_handle, name), value);
+    }
+
+    public void SetFloat(string name, float value)
+    {
+        Use();
+        GL.Uniform1(GL.GetUniformLocation(_handle, name), value);
+    }
+
     private void CompileVertex(string path)
     {
         _vertexShader = GL.CreateShader(ShaderType.VertexShader);
