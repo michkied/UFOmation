@@ -40,6 +40,8 @@ uniform SpotLight spotLight;
 #define NUM_UFO_LIGHTS 6
 uniform SpotLight ufoLights[NUM_UFO_LIGHTS];
 uniform Material material;
+uniform float fogDensity;
+uniform float specularStrength;
 
 out vec4 FragColor;
 
@@ -54,7 +56,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     //combine results
     vec3 ambient = light.ambient * vec3(texture(material.diffuse, texCoord));
     vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, texCoord));
-    vec3 specular = light.specular * spec * vec3(texture(material.specular, texCoord));
+    vec3 specular = light.specular * spec * vec3(texture(material.specular, texCoord)) * specularStrength;
     return (ambient + diffuse + specular);
 }
 
@@ -84,15 +86,14 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos)
     vec3 specular = light.specular * spec * vec3(texture(material.specular, texCoord));
     ambient *= attenuation;
     diffuse *= attenuation * intensity;
-    specular *= attenuation * intensity;
+    specular *= attenuation * intensity * specularStrength;
     return (ambient + diffuse + specular);
 }
 
 float CalcFogFactor(vec3 fragPos)
 {
-    float fogIntensity = 0.0;
-    if (fogIntensity == 0) return 1;
-    float gradient = (fogIntensity * fogIntensity - 5 * fogIntensity + 6);
+    if (fogDensity == 0) return 1;
+    float gradient = (fogDensity * fogDensity - 5 * fogDensity + 6);
     float distance = length(fragPos);
     float fog = exp(-pow((distance / gradient), 4));
     fog = clamp(fog, 0.0, 1.0);

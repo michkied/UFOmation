@@ -17,6 +17,10 @@ public class Animation : GameWindow
 
     private readonly Mirror _mirror;
     private readonly Ufo _ufo;
+    private readonly Sky _sky;
+
+    private float _fogDensity = 0.0f;
+    private float _specularStrength = 1.0f;
 
     public Animation(int width, int height, string title) : base(GameWindowSettings.Default,
         new NativeWindowSettings
@@ -32,7 +36,9 @@ public class Animation : GameWindow
         // _models.Add(new Surface(_shader));
         _models.Add(new Earth(_shader));
         _models.Add(new Sun(_shader));
-        _models.Add(new Sky(_shader));
+
+        _sky = new Sky(_shader);
+        _models.Add(_sky);
 
         _ufo = new Ufo(_shader, _lightPointShader);
         _models.Add(_ufo);
@@ -40,6 +46,8 @@ public class Animation : GameWindow
         _mirror = new Mirror(_mirrorShader);
 
         CursorState = CursorState.Grabbed;
+        _shader.SetFloat("fogDensity", _fogDensity);
+        _shader.SetFloat("specularStrength", _specularStrength);
     }
 
     protected override void OnUpdateFrame(FrameEventArgs args)
@@ -50,6 +58,31 @@ public class Animation : GameWindow
         if (KeyboardState.IsKeyDown(Keys.D1)) _cameraType = CameraType.Static;
         if (KeyboardState.IsKeyDown(Keys.D2)) _cameraType = CameraType.Follow;
         if (KeyboardState.IsKeyDown(Keys.D3)) _cameraType = CameraType.Ufo;
+
+        if (KeyboardState.IsKeyDown(Keys.F))
+        {
+            _fogDensity += 0.005f;
+            _sky.FogDensity = _fogDensity;
+            _shader.SetFloat("fogDensity", _fogDensity);
+        }
+        if (KeyboardState.IsKeyDown(Keys.G))
+        {
+            _fogDensity -= 0.005f;
+            _sky.FogDensity = _fogDensity;
+            _shader.SetFloat("fogDensity", _fogDensity);
+        }
+        
+        if (KeyboardState.IsKeyDown(Keys.H))
+        {
+            _specularStrength += 0.005f;
+            _shader.SetFloat("specularStrength", _specularStrength);
+        }
+        if (KeyboardState.IsKeyDown(Keys.J))
+        {
+            _specularStrength -= 0.005f;
+            if (_specularStrength < 0.0f) _specularStrength = 0.0f;
+            _shader.SetFloat("specularStrength", _specularStrength);
+        }
     }
 
     private enum CameraType
