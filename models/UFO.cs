@@ -5,11 +5,15 @@ namespace UFOmation.models;
 
 public class UFO : Model
 {
-    private readonly Texture _texture;
+    private readonly List<float> _vertices = GeometricPrimitives.GenerateSphere(64, 0.05f);
+
+    private readonly Texture _diffuse;
+    private readonly Texture _specular;
 
     public UFO(Shader shader) : base(shader)
     {
-        _texture = new Texture("../../../textures/dirt/dirt.jpg");
+        _diffuse = new Texture("../../../textures/metal/metal.jpg");
+        _specular = new Texture("../../../textures/metal/metal_specular.jpg");
         Init();
     }
 
@@ -29,14 +33,14 @@ public class UFO : Model
 
     public override void Draw(double time)
     {
-        _texture.Use();
-        _texture.Use(TextureUnit.Texture1);
+        _diffuse.Use();
+        _specular.Use(TextureUnit.Texture1);
         _shader.Use();
         var model = Matrix4.Identity;
 
         _rotAngle += (float)time * _rotSpeed;
         _moveAngle += (float)time * _moveSpeed;
-        model *= Matrix4.CreateScale(0.05f, 0.005f, 0.05f);
+        model *= Matrix4.CreateScale(1.0f, 0.15f, 1.0f);
         model *= Matrix4.CreateRotationY(_rotAngle);
         model *= Matrix4.CreateRotationZ(_moveAngle + (float)Math.PI / 2);
         model *= Matrix4.CreateTranslation(
@@ -59,7 +63,7 @@ public class UFO : Model
 
         _shader.SetMatrix4("model", model);
         GL.BindVertexArray(_vertexArrayObject);
-        GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
+        GL.DrawArrays(PrimitiveType.Triangles, 0, _vertices.Count);
     }
 
     public Matrix4 GetUFOView()
@@ -71,6 +75,6 @@ public class UFO : Model
 
     protected override float[] GetVertices()
     {
-        return Cube.Vertices;
+        return _vertices.ToArray();
     }
 }

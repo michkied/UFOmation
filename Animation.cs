@@ -28,8 +28,7 @@ public class Animation : GameWindow
     public Animation(int width, int height, string title) : base(GameWindowSettings.Default,
         new NativeWindowSettings
         {
-            ClientSize = (width, height), Title = title, NumberOfSamples = 4, WindowState = WindowState.Fullscreen,
-            StencilBits = 8
+            ClientSize = (width, height), Title = title, NumberOfSamples = 4, WindowState = WindowState.Fullscreen
         }
     )
     {
@@ -43,6 +42,9 @@ public class Animation : GameWindow
         _models.Add(_ufo);
 
         _mirror = new Mirror(_mirrorShader);
+        
+        CursorState = CursorState.Grabbed;
+
     }
 
     protected override void OnUpdateFrame(FrameEventArgs args)
@@ -82,6 +84,19 @@ public class Animation : GameWindow
         _shader.SetMatrix4("projection", projection);
         _shader.SetVector3("viewPos", cameraPosition);
 
+
+        // DirLight dirLight;
+        // dirLight.direction = normalize(vec3(vec4(0.0, -1.0, 0.0, 0.0) * view));
+        // dirLight.ambient = vec3(0.05, 0.05, 0.05);
+        // dirLight.diffuse = vec3(1.0, 1.0, 1.0);
+        // dirLight.specular = vec3(0.5, 0.5, 0.5);
+
+        _shader.SetVector3("dirLight.direction", new Vector3(new Vector4(0.0f, -1.0f, 0.0f, 0.0f) * view));
+        _shader.SetVector3("dirLight.ambient", new Vector3(0.05f, 0.05f, 0.05f));
+        _shader.SetVector3("dirLight.diffuse", new Vector3(1.0f, 1.0f, 1.0f));
+        _shader.SetVector3("dirLight.specular", new Vector3(0.5f, 0.5f, 0.5f));
+
+
         _mirrorShader.SetMatrix4("view", view);
         _mirrorShader.SetMatrix4("projection", projection);
 
@@ -100,18 +115,38 @@ public class Animation : GameWindow
     private readonly float _radius = 3.0f; // Distance from the origin
     private readonly float _speed = 0.5f; // Rotation speed
 
+
+    private Vector2 _mousePosition;
+
+    protected override void OnMouseMove(MouseMoveEventArgs e)
+    {
+        base.OnMouseMove(e);
+        _mousePosition = new Vector2(e.X, e.Y);
+    }
+
+    private Vector3 GetMouseRayDirection(Vector2 mousePos, Matrix4 projection)
+    {
+        var x = 2.0f * mousePos.X / ClientSize.X - 1.0f;
+        var y = 1.0f - 2.0f * mousePos.Y / ClientSize.Y;
+        
+        var rayClip = new Vector4(x, y, -1.0f, 1.0f);
+        
+        var invProjection = Matrix4.Invert(projection);
+        var rayEye = invProjection * rayClip;
+        rayEye.Z = -1.0f;
+        rayEye.W = 0.0f;
+        
+        rayEye.Normalize();
+
+        return new Vector3(rayEye);
+    }
+
     protected override void OnRenderFrame(FrameEventArgs e)
     {
         base.OnRenderFrame(e);
 
-        // Update rotation angle
-        // if (_rotate) _angle += (float)e.Time * _speed;
-        // var camX = _radius * MathF.Sin(_angle);
-        // var camX = 0.0f;
-        // var camZ = _radius * MathF.Cos(_angle);
         Vector3 cameraPosition;
         Matrix4 view;
-        // var view = Matrix4.LookAt(cameraPosition, Vector3.Zero, Vector3.UnitY);
         switch (_cameraType)
         {
             case CameraType.Static:
@@ -130,15 +165,39 @@ public class Animation : GameWindow
                 throw new Exception("Unknown CameraType!");
         }
 
-        _mirror.DrawReflection(_shader, cameraPosition, _models);
-
-        GL.Viewport(0, 0, ClientSize.X, ClientSize.Y);
-        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         var projection = Matrix4.CreatePerspectiveFieldOfView(
             MathHelper.DegreesToRadians(45.0f),
             ClientSize.X / (float)ClientSize.Y,
             0.1f,
             100.0f);
+
+        _shader.SetVector3("dirLight.direction", new Vector3(new Vector4(0.0f, -1.0f, 0.0f, 0.0f) * view));
+        
+        var ufoViewPos = new Vector3(new Vector4(_ufo.Position, 1.0f) * view);
+        Vector3 spotlightDir;
+        if (_cameraType == CameraType.UFO)
+        {
+            spotlightDir = GetMouseRayDirection(_mousePosition, projection) - ufoViewPos;
+        }
+        else
+        {
+            spotlightDir = new Vector3(new Vector4(-_ufo.Position, 0.0f) * view);
+        }
+        _shader.SetVector3("spotLight.direction", spotlightDir);
+        _shader.SetVector3("spotLight.position", ufoViewPos);
+        _shader.SetFloat("spotLight.cutOff", (float)Math.Cos(MathHelper.DegreesToRadians(20.0f)));
+        _shader.SetFloat("spotLight.outerCutOff", (float)Math.Cos(MathHelper.DegreesToRadians(30.0f)));
+        _shader.SetVector3("spotLight.ambient", new Vector3(0.0f, 0.0f, 0.0f));
+        _shader.SetVector3("spotLight.diffuse", new Vector3(0.643f, 1.0f, 0.357f));
+        _shader.SetVector3("spotLight.specular", new Vector3(0.643f, 1.0f, 0.357f));
+        _shader.SetFloat("spotLight.constant", 1.0f);
+        _shader.SetFloat("spotLight.linear", 0.09f);
+        _shader.SetFloat("spotLight.quadratic", 0.032f);
+
+        _mirror.DrawReflection(_shader, cameraPosition, _models);
+
+        GL.Viewport(0, 0, ClientSize.X, ClientSize.Y);
+        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         _shader.Use();
         _shader.SetMatrix4("view", view);
         _shader.SetMatrix4("projection", projection);
