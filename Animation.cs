@@ -21,6 +21,7 @@ public class Animation : GameWindow
     private readonly List<Model> _models = new();
 
     private readonly Mirror _mirror;
+    private readonly UFO _ufo;
 
     private bool _rotate;
 
@@ -37,7 +38,9 @@ public class Animation : GameWindow
 
         // _models.Add(new Surface(_shader));
         _models.Add(new Sphere(_shader));
-        _models.Add(new UFO(_shader));
+
+        _ufo = new UFO(_shader);
+        _models.Add(_ufo);
 
         _mirror = new Mirror(_mirrorShader);
     }
@@ -48,7 +51,20 @@ public class Animation : GameWindow
         if (KeyboardState.IsKeyDown(Keys.Escape)) Close();
         if (KeyboardState.IsKeyDown(Keys.Space)) _rotate = false;
         if (KeyboardState.IsKeyDown(Keys.R)) _rotate = true;
+
+        if (KeyboardState.IsKeyDown(Keys.D1)) _cameraType = CameraType.Static;
+        if (KeyboardState.IsKeyDown(Keys.D2)) _cameraType = CameraType.Follow;
+        if (KeyboardState.IsKeyDown(Keys.D3)) _cameraType = CameraType.UFO;
     }
+
+    private enum CameraType
+    {
+        Static,
+        Follow,
+        UFO
+    }
+
+    private CameraType _cameraType = CameraType.Static;
 
     protected override void OnLoad()
     {
@@ -89,12 +105,30 @@ public class Animation : GameWindow
         base.OnRenderFrame(e);
 
         // Update rotation angle
-        if (_rotate) _angle += (float)e.Time * _speed;
-        var camX = _radius * MathF.Sin(_angle);
+        // if (_rotate) _angle += (float)e.Time * _speed;
+        // var camX = _radius * MathF.Sin(_angle);
         // var camX = 0.0f;
-        var camZ = _radius * MathF.Cos(_angle);
-        var cameraPosition = new Vector3(camX, 0.7f, Math.Abs(camZ));
-        var view = Matrix4.LookAt(cameraPosition, Vector3.Zero, Vector3.UnitY);
+        // var camZ = _radius * MathF.Cos(_angle);
+        Vector3 cameraPosition;
+        Matrix4 view;
+        // var view = Matrix4.LookAt(cameraPosition, Vector3.Zero, Vector3.UnitY);
+        switch (_cameraType)
+        {
+            case CameraType.Static:
+                cameraPosition = new Vector3(0.0f, 0.7f, 3.0f);
+                view = Matrix4.LookAt(cameraPosition, Vector3.Zero, Vector3.UnitY);
+                break;
+            case CameraType.Follow:
+                cameraPosition = new Vector3(1.0f, 0.7f, 1.0f);
+                view = Matrix4.LookAt(cameraPosition, _ufo.Position, Vector3.UnitY);
+                break;
+            case CameraType.UFO:
+                cameraPosition = _ufo.Eye;
+                view = _ufo.GetUFOView();
+                break;
+            default:
+                throw new Exception("Unknown CameraType!");
+        }
 
         _mirror.DrawReflection(_shader, cameraPosition, _models);
 
