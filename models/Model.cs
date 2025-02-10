@@ -4,42 +4,37 @@ namespace UFOmation.models;
 
 public abstract class Model(Shader shader)
 {
-    protected readonly Shader _shader = shader;
+    protected readonly Shader Shader = shader;
 
     // private int _elementBufferObject;
-    protected int _vertexArrayObject;
-    protected int _vertexBufferObject;
+    protected int VertexArrayObject;
+    protected int VertexBufferObject;
 
-    public void Init()
+    protected void Init()
     {
-        _vertexArrayObject = GL.GenVertexArray();
-        GL.BindVertexArray(_vertexArrayObject);
+        VertexArrayObject = GL.GenVertexArray();
+        GL.BindVertexArray(VertexArrayObject);
 
-        _vertexBufferObject = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
+        VertexBufferObject = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObject);
         var vertices = GetVertices();
         GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices,
             BufferUsageHint.StaticDraw
         );
 
-        // _elementBufferObject = GL.GenBuffer();
-        // GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
-        // GL.BufferData(BufferTarget.ElementArrayBuffer, _indices.Length * sizeof(uint), _indices,
-        //     BufferUsageHint.StaticDraw);
-
-        var attributeLocation = _shader.GetAttribLocation("pos");
+        var attributeLocation = Shader.GetAttribLocation("pos");
         GL.EnableVertexAttribArray(attributeLocation);
         GL.VertexAttribPointer(attributeLocation, 3, VertexAttribPointerType.Float, false,
             8 * sizeof(float), 0
         );
 
-        attributeLocation = _shader.GetAttribLocation("tex");
+        attributeLocation = Shader.GetAttribLocation("tex");
         GL.EnableVertexAttribArray(attributeLocation);
         GL.VertexAttribPointer(attributeLocation, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float),
             3 * sizeof(float)
         );
 
-        attributeLocation = _shader.GetAttribLocation("normal");
+        attributeLocation = Shader.GetAttribLocation("normal");
         GL.EnableVertexAttribArray(attributeLocation);
         GL.VertexAttribPointer(attributeLocation, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float),
             5 * sizeof(float)
