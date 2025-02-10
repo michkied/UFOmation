@@ -13,7 +13,7 @@ public class Surface : Model
         Init();
     }
 
-    public override void Draw()
+    public override void Draw(double time)
     {
         _texture.Use();
         _shader.Use();

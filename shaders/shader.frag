@@ -61,7 +61,7 @@ void main()
     vec3 lightColor = vec3(1.0, 1.0, 1.0); //The color of the light.
 
     PointLight light;
-    light.position = vec3(vec4(0.0, 0.3, 0.0, 1.0) * view);
+    light.position = vec3(vec4(0.0, 1.0, 0.0, 1.0) * view);
     light.constant = 1.0;
     light.linear = 0.09;
     light.quadratic = 0.032;

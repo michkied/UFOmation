@@ -35,8 +35,8 @@ public class Animation : GameWindow
         _shader = new Shader("../../../shaders/shader.vert", "../../../shaders/shader.frag");
         _mirrorShader = new Shader("../../../shaders/mirror.vert", "../../../shaders/mirror.frag");
 
-        _models.Add(new Surface(_shader));
-        // _models.Add(new Sphere(_shader));
+        // _models.Add(new Surface(_shader));
+        _models.Add(new Sphere(_shader));
         _models.Add(new UFO(_shader));
 
         _mirror = new Mirror(_mirrorShader);
@@ -89,11 +89,11 @@ public class Animation : GameWindow
         base.OnRenderFrame(e);
 
         // Update rotation angle
-        // if (_rotate) _angle += (float)e.Time * _speed;
+        if (_rotate) _angle += (float)e.Time * _speed;
         var camX = _radius * MathF.Sin(_angle);
         // var camX = 0.0f;
         var camZ = _radius * MathF.Cos(_angle);
-        var cameraPosition = new Vector3(camX, 0.5f, Math.Abs(camZ));
+        var cameraPosition = new Vector3(camX, 0.7f, Math.Abs(camZ));
         var view = Matrix4.LookAt(cameraPosition, Vector3.Zero, Vector3.UnitY);
 
         _mirror.DrawReflection(_shader, cameraPosition, _models);
@@ -112,8 +112,8 @@ public class Animation : GameWindow
         _mirrorShader.SetMatrix4("view", view);
         _mirrorShader.SetMatrix4("projection", projection);
 
-        foreach (var model in _models) model.Draw();
-        _mirror.Draw();
+        foreach (var model in _models) model.Draw((float)e.Time);
+        _mirror.Draw((float)e.Time);
 
         SwapBuffers();
     }

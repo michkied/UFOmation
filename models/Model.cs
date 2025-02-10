@@ -46,7 +46,7 @@ public abstract class Model(Shader shader)
         );
     }
 
-    public virtual void Draw()
+    public virtual void Draw(double time)
     {
         throw new NotImplementedException();
     }

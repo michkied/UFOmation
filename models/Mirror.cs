@@ -83,12 +83,12 @@ public class Mirror : Model
         // GL.ColorMask(true, true, true, true);
 
         foreach (var model in models)
-            model.Draw();
+            model.Draw(0);
 
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
     }
 
-    public override void Draw()
+    public override void Draw(double time)
     {
         // var model = Matrix4.CreateTranslation(0.0f, 0.2f, 0.0f) * Matrix4.CreateScale(0.5f, 0.1f, 0.5f);
         _texture.Use();
