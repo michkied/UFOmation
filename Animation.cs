@@ -36,6 +36,7 @@ public class Animation : GameWindow
         // _models.Add(new Surface(_shader));
         _models.Add(new Earth(_shader));
         _models.Add(new Sun(_shader));
+        _models.Add(new Mars(_shader));
 
         _sky = new Sky(_shader);
         _models.Add(_sky);
