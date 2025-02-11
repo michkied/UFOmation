@@ -60,13 +60,13 @@ public static class GeometricPrimitives
                 var ny4 = y4 / radius;
                 var nz4 = z4 / radius;
 
-                vertices.AddRange(new[] { x1, y1, z1, u1, v1, nx1, ny1, nz1 });
-                vertices.AddRange(new[] { x2, y2, z2, u2, v2, nx2, ny2, nz2 });
-                vertices.AddRange(new[] { x3, y3, z3, u3, v3, nx3, ny3, nz3 });
+                vertices.AddRange([x1, y1, z1, u1, v1, nx1, ny1, nz1]);
+                vertices.AddRange([x2, y2, z2, u2, v2, nx2, ny2, nz2]);
+                vertices.AddRange([x3, y3, z3, u3, v3, nx3, ny3, nz3]);
 
-                vertices.AddRange(new[] { x3, y3, z3, u3, v3, nx3, ny3, nz3 });
-                vertices.AddRange(new[] { x2, y2, z2, u2, v2, nx2, ny2, nz2 });
-                vertices.AddRange(new[] { x4, y4, z4, u4, v4, nx4, ny4, nz4 });
+                vertices.AddRange([x3, y3, z3, u3, v3, nx3, ny3, nz3]);
+                vertices.AddRange([x2, y2, z2, u2, v2, nx2, ny2, nz2]);
+                vertices.AddRange([x4, y4, z4, u4, v4, nx4, ny4, nz4]);
             }
         }
 

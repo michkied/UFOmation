@@ -13,14 +13,25 @@ public class Animation : GameWindow
     private readonly Shader _mirrorShader;
     private readonly Shader _lightPointShader;
 
-    private readonly List<Model> _models = new();
+    private readonly List<Model> _models = [];
 
     private readonly Mirror _mirror;
     private readonly Ufo _ufo;
     private readonly Sky _sky;
 
-    private float _fogDensity = 0.0f;
+    private float _fogDensity;
     private float _specularStrength = 1.0f;
+
+    private enum CameraType
+    {
+        Static,
+        Follow,
+        Ufo
+    }
+
+    private CameraType _cameraType = CameraType.Static;
+
+    private Vector2 _mousePosition;
 
     public Animation(int width, int height, string title) : base(GameWindowSettings.Default,
         new NativeWindowSettings
@@ -33,7 +44,6 @@ public class Animation : GameWindow
         _mirrorShader = new Shader("../../../shaders/mirror.vert", "../../../shaders/mirror.frag");
         _lightPointShader = new Shader("../../../shaders/lightSource.vert", "../../../shaders/lightSource.frag");
 
-        // _models.Add(new Surface(_shader));
         _models.Add(new Earth(_shader));
         _models.Add(new Sun(_shader));
         _models.Add(new Mars(_shader));
@@ -66,18 +76,20 @@ public class Animation : GameWindow
             _sky.FogDensity = _fogDensity;
             _shader.SetFloat("fogDensity", _fogDensity);
         }
+
         if (KeyboardState.IsKeyDown(Keys.G))
         {
             _fogDensity -= 0.005f;
             _sky.FogDensity = _fogDensity;
             _shader.SetFloat("fogDensity", _fogDensity);
         }
-        
+
         if (KeyboardState.IsKeyDown(Keys.H))
         {
             _specularStrength += 0.005f;
             _shader.SetFloat("specularStrength", _specularStrength);
         }
+
         if (KeyboardState.IsKeyDown(Keys.J))
         {
             _specularStrength -= 0.005f;
@@ -85,15 +97,6 @@ public class Animation : GameWindow
             _shader.SetFloat("specularStrength", _specularStrength);
         }
     }
-
-    private enum CameraType
-    {
-        Static,
-        Follow,
-        Ufo
-    }
-
-    private CameraType _cameraType = CameraType.Static;
 
     protected override void OnLoad()
     {
@@ -136,8 +139,6 @@ public class Animation : GameWindow
         _shader.Dispose();
     }
 
-    private Vector2 _mousePosition;
-
     protected override void OnMouseMove(MouseMoveEventArgs e)
     {
         base.OnMouseMove(e);
@@ -155,7 +156,6 @@ public class Animation : GameWindow
         var rayEye = invProjection * rayClip;
         rayEye.Z = -1.0f;
         rayEye.W = 0.0f;
-
         rayEye.Normalize();
 
         return new Vector3(rayEye);

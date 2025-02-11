@@ -6,7 +6,6 @@ public abstract class Model(Shader shader)
 {
     protected readonly Shader Shader = shader;
 
-    // private int _elementBufferObject;
     protected int VertexArrayObject;
     protected int VertexBufferObject;
 

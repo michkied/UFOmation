@@ -5,8 +5,6 @@ namespace UFOmation.models;
 
 public class Mirror : Model
 {
-    private readonly Texture _texture;
-
     private int _mirrorFbo;
     private int _mirrorTexture;
     private int _mirrorDepthBuffer;
@@ -15,7 +13,6 @@ public class Mirror : Model
 
     public Mirror(Shader shader) : base(shader)
     {
-        _texture = new Texture("../../../textures/dirt/dirt.jpg");
         Init();
     }
 
@@ -79,7 +76,6 @@ public class Mirror : Model
 
     public override void Draw(double time)
     {
-        _texture.Use();
         GL.ActiveTexture(TextureUnit.Texture0);
         GL.BindTexture(TextureTarget.Texture2D, _mirrorTexture);
         Shader.Use();
@@ -90,8 +86,8 @@ public class Mirror : Model
 
     protected override float[] GetVertices()
     {
-        return new[]
-        {
+        return
+        [
             -0.5f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
             0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
             0.5f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
@@ -99,6 +95,6 @@ public class Mirror : Model
             -0.5f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
             0.5f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
             -0.5f, 1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f
-        };
+        ];
     }
 }

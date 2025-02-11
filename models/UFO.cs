@@ -11,24 +11,27 @@ public class Ufo : Model
     private readonly Texture _diffuse;
     private readonly Texture _specular;
 
-    private static readonly float Radius = 0.05f;
+    private const float Radius = 0.05f;
     private const int PointCount = 6;
 
     private float _rotAngle;
-    private readonly float _rotRadius = 0.6f;
-    private readonly float _rotSpeed = 1.5f;
+    private const float RotRadius = 0.6f;
+    private const float RotSpeed = 1.5f;
 
     private float _moveAngle;
-    private readonly float _moveSpeed = 0.2f;
+    private const float MoveSpeed = 0.2f;
 
     private Vector3 _position = new(0.0f, 0.0f, 0.0f);
     private Vector3 _eye = new(0.0f, 0.0f, 0.0f);
-    private readonly float _eyeHeight = 0.5f;
-    private readonly float _eyeDistance = 0.5f;
+    private const float EyeHeight = 0.5f;
+    private const float EyeDistance = 0.5f;
 
     private readonly Shader _lightPointShader;
     private int _lightPointVertexArrayObject;
     private int _lightPointVertexBufferObject;
+
+    private Matrix4 _model;
+
 
     public Vector3 Position => _position;
     public Vector3 Eye => _eye;
@@ -36,8 +39,8 @@ public class Ufo : Model
     public Ufo(Shader mainShader, Shader lightPointShader) : base(mainShader)
     {
         _lightPointShader = lightPointShader;
-        _diffuse = new Texture("../../../textures/metal/metal.jpg");
-        _specular = new Texture("../../../textures/metal/metal_specular.jpg");
+        _diffuse = new Texture("../../../textures/metal.jpg");
+        _specular = new Texture("../../../textures/metal_specular.jpg");
         Init();
         InitLightPoints();
     }
@@ -70,18 +73,17 @@ public class Ufo : Model
     private static List<float> GenerateLightPoints()
     {
         var lightPoints = new List<float>();
-        var angleStep = 360f / PointCount;
+        const float angleStep = 360f / PointCount;
 
         for (var i = 0; i < PointCount; i++)
         {
             var angleRadians = float.DegreesToRadians(i * angleStep);
-            lightPoints.AddRange(new[]
-            {
+            lightPoints.AddRange([
                 Radius * (float)Math.Cos(angleRadians),
                 0,
                 Radius * (float)Math.Sin(angleRadians),
                 1.0f, 0.0f, 0.0f
-            });
+            ]);
         }
 
         return lightPoints;
@@ -94,12 +96,12 @@ public class Ufo : Model
         Shader.Use();
         var model = Matrix4.Identity;
 
-        _rotAngle += (float)time * _rotSpeed;
-        _moveAngle += (float)time * _moveSpeed;
+        _rotAngle += (float)time * RotSpeed;
+        _moveAngle += (float)time * MoveSpeed;
 
         _position = new Vector3(
-            _rotRadius * (float)Math.Cos(_moveAngle),
-            _rotRadius * (float)Math.Sin(_moveAngle),
+            RotRadius * (float)Math.Cos(_moveAngle),
+            RotRadius * (float)Math.Sin(_moveAngle),
             0.0f
         );
 
@@ -113,11 +115,10 @@ public class Ufo : Model
         );
 
         _eye = new Vector3(
-            (_rotRadius + _eyeHeight) * (float)Math.Cos(_moveAngle - _eyeDistance),
-            (_rotRadius + _eyeHeight) * (float)Math.Sin(_moveAngle - _eyeDistance),
+            (RotRadius + EyeHeight) * (float)Math.Cos(_moveAngle - EyeDistance),
+            (RotRadius + EyeHeight) * (float)Math.Sin(_moveAngle - EyeDistance),
             0.0f
         );
-        // model *= Matrix4.CreateScale(0.2f, 0.2f, 0.2f) * Matrix4.CreateTranslation(0.6f, 0.2f, 0.4f);
 
         _model = model;
 
@@ -132,8 +133,6 @@ public class Ufo : Model
         GL.DrawArrays(PrimitiveType.Points, 0, _lightPoints.Count);
         GL.PointSize(1);
     }
-
-    private Matrix4 _model;
 
     public void GenerateUfoLights(Matrix4 view)
     {

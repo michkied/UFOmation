@@ -12,8 +12,8 @@ public class Earth : Model
 
     public Earth(Shader shader) : base(shader)
     {
-        _diffuse = new Texture("../../../textures/earth/earth.jpg");
-        _specular = new Texture("../../../textures/earth/earth_specular.jpg");
+        _diffuse = new Texture("../../../textures/earth.jpg");
+        _specular = new Texture("../../../textures/earth_specular.jpg");
         Init();
     }
 
@@ -27,9 +27,7 @@ public class Earth : Model
         Shader.SetInt("material.specular", 1);
         Shader.SetVector3("material.specular", new Vector3(0.5f, 0.5f, 0.5f));
         Shader.SetFloat("material.shininess", 32.0f);
-        // var model = Matrix4.CreateRotationX(float.DegreesToRadians(-90.0f));
-        var model = Matrix4.Identity;
-        Shader.SetMatrix4("model", model);
+        Shader.SetMatrix4("model", Matrix4.Identity);
         GL.BindVertexArray(VertexArrayObject);
         GL.DrawArrays(PrimitiveType.Triangles, 0, _vertices.Count);
     }
